@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistemas de Usuários de SUB-ST</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/></svg>');
+            background-size: 100px;
+            opacity: 0.3;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            position: relative;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #2a5298;
+        }
+
+        .form-section h2 {
+            color: #0f2027;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-section h2::before {
+            content: '➕';
+            font-size: 1.2em;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .form-group label span {
+            color: #e74c3c;
+            margin-left: 3px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #aaa;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(42, 82, 152, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #219a52 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(243, 156, 18, 0.4);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .table-section {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .table-header {
+            background: #0f2027;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .table-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-header h2::before {
+            content: '📋';
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9em;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #2c5364;
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+
+        tbody tr {
+            transition: background 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fafbfc;
+        }
+
+        tbody tr:nth-child(even):hover {
+            background: #f0f2f5;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #2980b9;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .search-box input {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+
+            .header {
+                background: #0f2027 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .form-section,
+            .btn-group,
+            .actions,
+            .search-box,
+            .table-header .btn {
+                display: none !important;
+            }
+
+            .table-section {
+                box-shadow: none;
+            }
+
+            thead {
+                background: #2c5364 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            tbody tr:nth-child(even) {
+                background: #f5f5f5 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .table-header {
+                background: #0f2027 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            td, th {
+                font-size: 0.9em;
+                padding: 10px;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h3 {
+            margin-bottom: 15px;
+            color: #0f2027;
+        }
+
+        .modal-content p {
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-success {
+            background: #27ae60;
+        }
+
+        .toast-error {
+            background: #e74c3c;
+        }
+
+        .toast-info {
+            background: #3498db;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            th, td {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖥️ Sistemas de Usuários de SUB-ST</h1>
+            <p>Cadastro e Gerenciamento de Usuários dos Sistemas</p>
+        </div>
+
+        <div class="content">
+            <!-- Form Section -->
+            <div class="form-section">
+                <h2>Cadastrar Novo Usuário</h2>
+                <form id="userForm">
+                    <input type="hidden" id="editId" value="">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nome">Nome <span>*</span></label>
+                            <input type="text" id="nome" placeholder="Nome completo do usuário" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="rf">RF (Registro Funcional) <span>*</span></label>
+                            <input type="text" id="rf" placeholder="Identificador único" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">E-mail Institucional <span>*</span></label>
+                            <input type="email" id="email" placeholder="email@prefeitura.sp.gov.br" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="setor">Setor <span>*</span></label>
+                            <input type="text" id="setor" placeholder="Digite o setor" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="sistemas">Sistemas <span>*</span></label>
+                            <input type="text" id="sistemas" placeholder="Sistemas que utiliza" required>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary" id="btnSalvar">
+                            💾 Salvar Usuário
+                        </button>
+                        <button type="button" class="btn btn-warning" id="btnLimpar" onclick="limparFormulario()">
+                            🔄 Limpar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Table Section -->
+            <div class="table-section">
+                <div class="table-header">
+                    <h2>Relatório de Usuários Cadastrados</h2>
+                    <div class="stats">
+                        <span class="stat-item">Total: <strong id="totalRegistros">0</strong></span>
+                    </div>
+                </div>
+                
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="🔍 Pesquisar por nome, RF, e-mail, setor ou sistema..." onkeyup="filtrarTabela()">
+                </div>
+
+                <div id="tableContainer">
+                    <table id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>RF</th>
+                                <th>E-mail</th>
+                                <th>Setor</th>
+                                <th>Sistemas</th>
+                                <th class="no-print">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Data will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="btn-group" style="padding: 20px; justify-content: center;">
+                    <button class="btn btn-success" onclick="imprimirRelatorio()">
+                        🖨️ Imprimir Relatório
+                    </button>
+                    <button class="btn btn-danger" onclick="confirmarLimparTudo()">
+                        🗑️ Limpar Todos os Dados
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <h3>⚠️ Confirmar Exclusão</h3>
+            <p>Tem certeza que deseja excluir todos os registros? Esta ação não pode ser desfeita.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-danger" onclick="limparTudo()">Sim, Excluir</button>
+                <button class="btn btn-primary" onclick="fecharModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Initialize data from localStorage
+        let usuarios = JSON.parse(localStorage.getItem('usuariosSUBST')) || [];
+
+        // DOM Elements
+        const form = document.getElementById('userForm');
+        const tableBody = document.getElementById('tableBody');
+        const totalRegistros = document.getElementById('totalRegistros');
+        const btnSalvar = document.getElementById('btnSalvar');
+        const editId = document.getElementById('editId');
+
+        // Load initial data
+        document.addEventListener('DOMContentLoaded', function() {
+            renderizarTabela();
+        });
+
+        // Form Submit
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const nome = document.getElementById('nome').value.trim();
+            const rf = document.getElementById('rf').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const setor = document.getElementById('setor').value.trim();
+            const sistemas = document.getElementById('sistemas').value.trim();
+
+            // Validation
+            if (!nome || !rf || !email || !setor || !sistemas) {
+                mostrarToast('Por favor, preencha todos os campos!', 'error');
+                return;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                mostrarToast('Por favor, insira um e-mail válido!', 'error');
+                return;
+            }
+
+            // Check for duplicate RF (except when editing)
+            const rfExistente = usuarios.find(u => u.rf === rf && u.id !== editId.value);
+            if (rfExistente && !editId.value) {
+                mostrarToast('Já existe um usuário com este RF!', 'error');
+                return;
+            }
+
+            if (editId.value) {
+                // Update existing
+                const index = usuarios.findIndex(u => u.id === editId.value);
+                if (index !== -1) {
+                    usuarios[index] = {
+                        id: editId.value,
+                        nome,
+                        rf,
+                        email,
+                        setor,
+                        sistemas,
+                        dataCadastro: usuarios[index].dataCadastro
+                    };
+                    mostrarToast('Usuário atualizado com sucesso!', 'success');
+                }
+            } else {
+                // Add new
+                const novoUsuario = {
+                    id: Date.now().toString(),
+                    nome,
+                    rf,
+                    email,
+                    setor,
+                    sistemas,
+                    dataCadastro: new Date().toLocaleDateString('pt-BR')
+                };
+                usuarios.push(novoUsuario);
+                mostrarToast('Usuário cadastrado com sucesso!', 'success');
+            }
+
+            salvarDados();
+            limparFormulario();
+            renderizarTabela();
+        });
+
+        function renderizarTabela(data = usuarios) {
+            tableBody.innerHTML = '';
+
+            if (data.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <p>Nenhum usuário cadastrado.</p>
+                            <p>Preencha o formulário acima para adicionar um novo usuário.</p>
+                        </td>
+                    </tr>
+                `;
+                totalRegistros.textContent = '0';
+                return;
+            }
+
+            data.forEach(usuario => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${escapeHtml(usuario.nome)}</td>
+                    <td>${escapeHtml(usuario.rf)}</td>
+                    <td>${escapeHtml(usuario.email)}</td>
+                    <td>${escapeHtml(usuario.setor)}</td>
+                    <td>${escapeHtml(usuario.sistemas)}</td>
+                    <td class="actions no-print">
+                        <button class="btn-small btn-edit" onclick="editarUsuario('${usuario.id}')">✏️ Editar</button>
+                        <button class="btn-small btn-delete" onclick="excluirUsuario('${usuario.id}')">🗑️ Excluir</button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            totalRegistros.textContent = data.length;
+        }
+
+        function editarUsuario(id) {
+            const usuario = usuarios.find(u => u.id === id);
+            if (!usuario) return;
+
+            document.getElementById('nome').value = usuario.nome;
+            document.getElementById('rf').value = usuario.rf;
+            document.getElementById('email').value = usuario.email;
+            document.getElementById('setor').value = usuario.setor;
+            document.getElementById('sistemas').value = usuario.sistemas;
+            editId.value = usuario.id;
+
+            btnSalvar.innerHTML = '💾 Atualizar Usuário';
+            btnSalvar.classList.remove('btn-primary');
+            btnSalvar.classList.add('btn-success');
+
+            // Scroll to form
+            document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+            mostrarToast('Modo edição ativado', 'info');
+        }
+
+        function excluirUsuario(id) {
+            if (confirm('Tem certeza que deseja excluir este usuário?')) {
+                usuarios = usuarios.filter(u => u.id !== id);
+                salvarDados();
+                renderizarTabela();
+                mostrarToast('Usuário excluído com sucesso!', 'success');
+                
+                // If editing the deleted user, clear form
+                if (editId.value === id) {
+                    limparFormulario();
+                }
+            }
+        }
+
+        function limparFormulario() {
+            form.reset();
+            editId.value = '';
+            btnSalvar.innerHTML = '💾 Salvar Usuário';
+            btnSalvar.classList.remove('btn-success');
+            btnSalvar.classList.add('btn-primary');
+        }
+
+        function confirmarLimparTudo() {
+            if (usuarios.length === 0) {
+                mostrarToast('Não há dados para excluir!', 'error');
+                return;
+            }
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        function limparTudo() {
+            usuarios = [];
+            salvarDados();
+            renderizarTabela();
+            limparFormulario();
+            fecharModal();
+            mostrarToast('Todos os dados foram excluídos!', 'success');
+        }
+
+        function fecharModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+        }
+
+        function filtrarTabela() {
+            const termo = document.getElementById('searchInput').value.toLowerCase();
+            const filtrados = usuarios.filter(u => 
+                u.nome.toLowerCase().includes(termo) ||
+                u.rf.toLowerCase().includes(termo) ||
+                u.email.toLowerCase().includes(termo) ||
+                u.setor.toLowerCase().includes(termo) ||
+                u.sistemas.toLowerCase().includes(termo)
+            );
+            renderizarTabela(filtrados);
+        }
+
+        function imprimirRelatorio() {
+            if (usuarios.length === 0) {
+                mostrarToast('Não há dados para imprimir!', 'error');
+                return;
+            }
+            window.print();
+        }
+
+        function salvarDados() {
+            localStorage.setItem('usuariosSUBST', JSON.stringify(usuarios));
+        }
+
+        function mostrarToast(mensagem, tipo) {
+            const toast = document.getElementById('toast');
+            toast.textContent = mensagem;
+            toast.className = `toast toast-${tipo}`;
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Close modal on outside click
+        document.getElementById('confirmModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                fecharModal();
+            }
+        });
+    </script>
+</body>
+</html>
