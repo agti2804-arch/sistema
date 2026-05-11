@@ -1,9 +1,11 @@
-<!DOCTYPE html>
+html_content = r'''<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistemas de Usuários de SUB-ST</title>
+    <!-- SheetJS para exportação Excel nativa -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -130,6 +132,111 @@
             color: #aaa;
         }
 
+        /* Sistemas Input Area */
+        .sistemas-area {
+            grid-column: 1 / -1;
+        }
+
+        .sistemas-input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .sistemas-input-container input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .sistemas-input-container input:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .btn-add-sistema {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #27ae60 0%, #219a52 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .btn-add-sistema:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(39, 174, 96, 0.4);
+        }
+
+        .sistemas-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            min-height: 40px;
+            padding: 10px;
+            background: white;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+        }
+
+        .sistema-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+            animation: tagIn 0.3s ease;
+        }
+
+        @keyframes tagIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .sistema-tag .remove-tag {
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            line-height: 1;
+            padding: 0 2px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .sistema-tag .remove-tag:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .sistemas-vazio {
+            color: #aaa;
+            font-style: italic;
+            width: 100%;
+            text-align: center;
+            padding: 5px;
+        }
+
         .btn {
             padding: 12px 30px;
             border: none;
@@ -183,6 +290,16 @@
         .btn-warning:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(243, 156, 18, 0.4);
+        }
+
+        .btn-excel {
+            background: linear-gradient(135deg, #217346 0%, #1e6b3f 100%);
+            color: white;
+        }
+
+        .btn-excel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(33, 115, 70, 0.4);
         }
 
         .btn-group {
@@ -483,6 +600,10 @@
                 grid-template-columns: 1fr;
             }
             
+            .sistemas-input-container {
+                flex-direction: column;
+            }
+            
             .btn-group {
                 flex-direction: column;
             }
@@ -506,7 +627,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🖥️ Sistemas de Usuários de SUB-ST</h1>
+            <h1>Sistemas de Usuários de SUB-ST</h1>
             <p>Cadastro e Gerenciamento de Usuários dos Sistemas</p>
         </div>
 
@@ -533,17 +654,28 @@
                             <label for="setor">Setor <span>*</span></label>
                             <input type="text" id="setor" placeholder="Digite o setor" required>
                         </div>
-                        <div class="form-group">
-                            <label for="sistemas">Sistemas <span>*</span></label>
-                            <input type="text" id="sistemas" placeholder="Sistemas que utiliza" required>
+                        
+                        <!-- Sistemas com botão de adicionar -->
+                        <div class="form-group sistemas-area">
+                            <label for="sistemaInput">Sistemas <span>*</span></label>
+                            <div class="sistemas-input-container">
+                                <input type="text" id="sistemaInput" placeholder="Digite o nome do sistema e clique em Adicionar">
+                                <button type="button" class="btn-add-sistema" onclick="adicionarSistema()">
+                                    + Adicionar
+                                </button>
+                            </div>
+                            <div class="sistemas-tags" id="sistemasTags">
+                                <span class="sistemas-vazio">Nenhum sistema adicionado. Digite acima e clique em "Adicionar".</span>
+                            </div>
+                            <input type="hidden" id="sistemas" required>
                         </div>
                     </div>
                     <div class="btn-group">
                         <button type="submit" class="btn btn-primary" id="btnSalvar">
-                            💾 Salvar Usuário
+                            Salvar Usuário
                         </button>
                         <button type="button" class="btn btn-warning" id="btnLimpar" onclick="limparFormulario()">
-                            🔄 Limpar
+                            Limpar
                         </button>
                     </div>
                 </form>
@@ -559,7 +691,7 @@
                 </div>
                 
                 <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="🔍 Pesquisar por nome, RF, e-mail, setor ou sistema..." onkeyup="filtrarTabela()">
+                    <input type="text" id="searchInput" placeholder="Pesquisar por nome, RF, e-mail, setor ou sistema..." onkeyup="filtrarTabela()">
                 </div>
 
                 <div id="tableContainer">
@@ -581,11 +713,14 @@
                 </div>
 
                 <div class="btn-group" style="padding: 20px; justify-content: center;">
+                    <button class="btn btn-excel" onclick="exportarExcel()">
+                        Exportar para Excel
+                    </button>
                     <button class="btn btn-success" onclick="imprimirRelatorio()">
-                        🖨️ Imprimir Relatório
+                        Imprimir Relatório
                     </button>
                     <button class="btn btn-danger" onclick="confirmarLimparTudo()">
-                        🗑️ Limpar Todos os Dados
+                        Limpar Todos os Dados
                     </button>
                 </div>
             </div>
@@ -595,7 +730,7 @@
     <!-- Modal de Confirmação -->
     <div class="modal" id="confirmModal">
         <div class="modal-content">
-            <h3>⚠️ Confirmar Exclusão</h3>
+            <h3>Confirmar Exclusão</h3>
             <p>Tem certeza que deseja excluir todos os registros? Esta ação não pode ser desfeita.</p>
             <div class="modal-buttons">
                 <button class="btn btn-danger" onclick="limparTudo()">Sim, Excluir</button>
@@ -610,6 +745,7 @@
     <script>
         // Initialize data from localStorage
         let usuarios = JSON.parse(localStorage.getItem('usuariosSUBST')) || [];
+        let sistemasAtuais = []; // Array para armazenar sistemas do formulário atual
 
         // DOM Elements
         const form = document.getElementById('userForm');
@@ -617,11 +753,84 @@
         const totalRegistros = document.getElementById('totalRegistros');
         const btnSalvar = document.getElementById('btnSalvar');
         const editId = document.getElementById('editId');
+        const sistemaInput = document.getElementById('sistemaInput');
+        const sistemasTags = document.getElementById('sistemasTags');
+        const sistemasHidden = document.getElementById('sistemas');
 
         // Load initial data
         document.addEventListener('DOMContentLoaded', function() {
             renderizarTabela();
+            
+            // Enter no input de sistemas também adiciona
+            sistemaInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    adicionarSistema();
+                }
+            });
         });
+
+        // ========== FUNÇÕES DE SISTEMAS ==========
+        function adicionarSistema() {
+            const valor = sistemaInput.value.trim();
+            
+            if (!valor) {
+                mostrarToast('Digite o nome do sistema!', 'error');
+                return;
+            }
+            
+            // Verificar se já existe
+            if (sistemasAtuais.includes(valor)) {
+                mostrarToast('Este sistema já foi adicionado!', 'error');
+                sistemaInput.value = '';
+                sistemaInput.focus();
+                return;
+            }
+            
+            sistemasAtuais.push(valor);
+            atualizarTagsSistemas();
+            sistemaInput.value = '';
+            sistemaInput.focus();
+            mostrarToast('Sistema "' + valor + '" adicionado!', 'success');
+        }
+
+        function removerSistema(index) {
+            const removido = sistemasAtuais[index];
+            sistemasAtuais.splice(index, 1);
+            atualizarTagsSistemas();
+            mostrarToast('Sistema "' + removido + '" removido!', 'info');
+        }
+
+        function atualizarTagsSistemas() {
+            if (sistemasAtuais.length === 0) {
+                sistemasTags.innerHTML = '<span class="sistemas-vazio">Nenhum sistema adicionado. Digite acima e clique em "Adicionar".</span>';
+                sistemasHidden.value = '';
+                return;
+            }
+            
+            sistemasTags.innerHTML = sistemasAtuais.map(function(sistema, index) {
+                return '<span class="sistema-tag">' +
+                    escapeHtml(sistema) +
+                    '<span class="remove-tag" onclick="removerSistema(' + index + ')" title="Remover">×</span>' +
+                    '</span>';
+            }).join('');
+            
+            // Atualizar campo hidden com todos os sistemas separados por vírgula
+            sistemasHidden.value = sistemasAtuais.join(', ');
+        }
+
+        function carregarSistemasEdicao(sistemasString) {
+            if (!sistemasString) {
+                sistemasAtuais = [];
+                atualizarTagsSistemas();
+                return;
+            }
+            
+            // Separar por vírgula e limpar
+            sistemasAtuais = sistemasString.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
+            atualizarTagsSistemas();
+        }
+        // ========== FIM FUNÇÕES SISTEMAS ==========
 
         // Form Submit
         form.addEventListener('submit', function(e) {
@@ -631,11 +840,16 @@
             const rf = document.getElementById('rf').value.trim();
             const email = document.getElementById('email').value.trim();
             const setor = document.getElementById('setor').value.trim();
-            const sistemas = document.getElementById('sistemas').value.trim();
+            const sistemas = sistemasHidden.value.trim();
 
             // Validation
-            if (!nome || !rf || !email || !setor || !sistemas) {
-                mostrarToast('Por favor, preencha todos os campos!', 'error');
+            if (!nome || !rf || !email || !setor) {
+                mostrarToast('Por favor, preencha todos os campos obrigatórios!', 'error');
+                return;
+            }
+            
+            if (sistemasAtuais.length === 0) {
+                mostrarToast('Adicione pelo menos um sistema!', 'error');
                 return;
             }
 
@@ -647,7 +861,7 @@
             }
 
             // Check for duplicate RF (except when editing)
-            const rfExistente = usuarios.find(u => u.rf === rf && u.id !== editId.value);
+            const rfExistente = usuarios.find(function(u) { return u.rf === rf && u.id !== editId.value; });
             if (rfExistente && !editId.value) {
                 mostrarToast('Já existe um usuário com este RF!', 'error');
                 return;
@@ -655,15 +869,15 @@
 
             if (editId.value) {
                 // Update existing
-                const index = usuarios.findIndex(u => u.id === editId.value);
+                const index = usuarios.findIndex(function(u) { return u.id === editId.value; });
                 if (index !== -1) {
                     usuarios[index] = {
                         id: editId.value,
-                        nome,
-                        rf,
-                        email,
-                        setor,
-                        sistemas,
+                        nome: nome,
+                        rf: rf,
+                        email: email,
+                        setor: setor,
+                        sistemas: sistemas,
                         dataCadastro: usuarios[index].dataCadastro
                     };
                     mostrarToast('Usuário atualizado com sucesso!', 'success');
@@ -672,11 +886,11 @@
                 // Add new
                 const novoUsuario = {
                     id: Date.now().toString(),
-                    nome,
-                    rf,
-                    email,
-                    setor,
-                    sistemas,
+                    nome: nome,
+                    rf: rf,
+                    email: email,
+                    setor: setor,
+                    sistemas: sistemas,
                     dataCadastro: new Date().toLocaleDateString('pt-BR')
                 };
                 usuarios.push(novoUsuario);
@@ -688,54 +902,67 @@
             renderizarTabela();
         });
 
-        function renderizarTabela(data = usuarios) {
+        function renderizarTabela(data) {
+            if (data === undefined) data = usuarios;
             tableBody.innerHTML = '';
 
             if (data.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="empty-state">
-                            <div class="empty-state-icon">📭</div>
-                            <p>Nenhum usuário cadastrado.</p>
-                            <p>Preencha o formulário acima para adicionar um novo usuário.</p>
-                        </td>
-                    </tr>
-                `;
+                tableBody.innerHTML = 
+                    '<tr>' +
+                        '<td colspan="6" class="empty-state">' +
+                            '<div class="empty-state-icon">📭</div>' +
+                            '<p>Nenhum usuário cadastrado.</p>' +
+                            '<p>Preencha o formulário acima para adicionar um novo usuário.</p>' +
+                        '</td>' +
+                    '</tr>';
                 totalRegistros.textContent = '0';
                 return;
             }
 
-            data.forEach(usuario => {
+            data.forEach(function(usuario) {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${escapeHtml(usuario.nome)}</td>
-                    <td>${escapeHtml(usuario.rf)}</td>
-                    <td>${escapeHtml(usuario.email)}</td>
-                    <td>${escapeHtml(usuario.setor)}</td>
-                    <td>${escapeHtml(usuario.sistemas)}</td>
-                    <td class="actions no-print">
-                        <button class="btn-small btn-edit" onclick="editarUsuario('${usuario.id}')">✏️ Editar</button>
-                        <button class="btn-small btn-delete" onclick="excluirUsuario('${usuario.id}')">🗑️ Excluir</button>
-                    </td>
-                `;
+                tr.innerHTML = 
+                    '<td>' + escapeHtml(usuario.nome) + '</td>' +
+                    '<td>' + escapeHtml(usuario.rf) + '</td>' +
+                    '<td>' + escapeHtml(usuario.email) + '</td>' +
+                    '<td>' + escapeHtml(usuario.setor) + '</td>' +
+                    '<td>' + formatarSistemas(usuario.sistemas) + '</td>' +
+                    '<td class="actions no-print">' +
+                        '<button class="btn-small btn-edit" onclick="editarUsuario(\'' + usuario.id + '\')">Editar</button>' +
+                        '<button class="btn-small btn-delete" onclick="excluirUsuario(\'' + usuario.id + '\')">Excluir</button>' +
+                    '</td>';
                 tableBody.appendChild(tr);
             });
 
             totalRegistros.textContent = data.length;
         }
 
+        function formatarSistemas(sistemasString) {
+            if (!sistemasString) return '-';
+            var sistemas = sistemasString.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
+            if (sistemas.length === 0) return '-';
+            if (sistemas.length === 1) return escapeHtml(sistemas[0]);
+            
+            return sistemas.map(function(s) {
+                return '<span style="display:inline-block;background:#e3f2fd;color:#1565c0;padding:2px 8px;border-radius:12px;font-size:0.85em;margin:2px;">' + escapeHtml(s) + '</span>';
+            }).join(' ');
+        }
+
         function editarUsuario(id) {
-            const usuario = usuarios.find(u => u.id === id);
+            const usuario = usuarios.find(function(u) { return u.id === id; });
             if (!usuario) return;
 
             document.getElementById('nome').value = usuario.nome;
             document.getElementById('rf').value = usuario.rf;
             document.getElementById('email').value = usuario.email;
             document.getElementById('setor').value = usuario.setor;
-            document.getElementById('sistemas').value = usuario.sistemas;
+            
+            // Carregar sistemas no modo de tags
+            carregarSistemasEdicao(usuario.sistemas);
+            
             editId.value = usuario.id;
 
-            btnSalvar.innerHTML = '💾 Atualizar Usuário';
+            btnSalvar.innerHTML = 'Atualizar Usuário';
             btnSalvar.classList.remove('btn-primary');
             btnSalvar.classList.add('btn-success');
 
@@ -746,7 +973,7 @@
 
         function excluirUsuario(id) {
             if (confirm('Tem certeza que deseja excluir este usuário?')) {
-                usuarios = usuarios.filter(u => u.id !== id);
+                usuarios = usuarios.filter(function(u) { return u.id !== id; });
                 salvarDados();
                 renderizarTabela();
                 mostrarToast('Usuário excluído com sucesso!', 'success');
@@ -761,7 +988,9 @@
         function limparFormulario() {
             form.reset();
             editId.value = '';
-            btnSalvar.innerHTML = '💾 Salvar Usuário';
+            sistemasAtuais = [];
+            atualizarTagsSistemas();
+            btnSalvar.innerHTML = 'Salvar Usuário';
             btnSalvar.classList.remove('btn-success');
             btnSalvar.classList.add('btn-primary');
         }
@@ -789,13 +1018,13 @@
 
         function filtrarTabela() {
             const termo = document.getElementById('searchInput').value.toLowerCase();
-            const filtrados = usuarios.filter(u => 
-                u.nome.toLowerCase().includes(termo) ||
-                u.rf.toLowerCase().includes(termo) ||
-                u.email.toLowerCase().includes(termo) ||
-                u.setor.toLowerCase().includes(termo) ||
-                u.sistemas.toLowerCase().includes(termo)
-            );
+            const filtrados = usuarios.filter(function(u) {
+                return u.nome.toLowerCase().includes(termo) ||
+                    u.rf.toLowerCase().includes(termo) ||
+                    u.email.toLowerCase().includes(termo) ||
+                    u.setor.toLowerCase().includes(termo) ||
+                    u.sistemas.toLowerCase().includes(termo);
+            });
             renderizarTabela(filtrados);
         }
 
@@ -807,6 +1036,125 @@
             window.print();
         }
 
+        // ========== EXPORTAR PARA EXCEL - DADOS DO USUÁRIO + UM SISTEMA POR LINHA ==========
+        function exportarExcel() {
+            if (usuarios.length === 0) {
+                mostrarToast('Não há dados para exportar!', 'error');
+                return;
+            }
+
+            // Criar dados expandidos: cada sistema do usuário em uma linha separada
+            // Mantendo TODOS os dados do usuário em cada linha
+            var dadosExcel = [];
+            
+            usuarios.forEach(function(u) {
+                var sistemas = u.sistemas.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
+                
+                // Se não tiver sistemas, adiciona uma linha com sistema vazio
+                if (sistemas.length === 0) {
+                    dadosExcel.push({
+                        'Nome': u.nome,
+                        'RF': u.rf,
+                        'E-mail': u.email,
+                        'Setor': u.setor,
+                        'Sistema': '-',
+                        'Data de Cadastro': u.dataCadastro || '-'
+                    });
+                    return;
+                }
+                
+                // Para CADA sistema do usuário, criar uma linha completa com todos os dados
+                sistemas.forEach(function(sistema) {
+                    dadosExcel.push({
+                        'Nome': u.nome,
+                        'RF': u.rf,
+                        'E-mail': u.email,
+                        'Setor': u.setor,
+                        'Sistema': sistema,
+                        'Data de Cadastro': u.dataCadastro || '-'
+                    });
+                });
+            });
+
+            // Criar worksheet
+            var ws = XLSX.utils.json_to_sheet(dadosExcel);
+
+            // Definir larguras das colunas
+            ws['!cols'] = [
+                { wch: 35 },  // Nome
+                { wch: 15 },  // RF
+                { wch: 35 },  // E-mail
+                { wch: 25 },  // Setor
+                { wch: 30 },  // Sistema
+                { wch: 18 }   // Data de Cadastro
+            ];
+
+            // Aplicar estilos nos cabeçalhos (linha 1)
+            var range = XLSX.utils.decode_range(ws['!ref']);
+            
+            // Estilo do cabeçalho
+            var headerStyle = {
+                font: { bold: true, color: { rgb: "FFFFFF" }, sz: 12 },
+                fill: { fgColor: { rgb: "2C5364" }, patternType: "solid" },
+                alignment: { horizontal: "left", vertical: "center" },
+                border: {
+                    top: { style: "thin", color: { rgb: "1A3A4A" } },
+                    bottom: { style: "thin", color: { rgb: "1A3A4A" } },
+                    left: { style: "thin", color: { rgb: "1A3A4A" } },
+                    right: { style: "thin", color: { rgb: "1A3A4A" } }
+                }
+            };
+
+            // Estilo das células de dados
+            var cellStyle = {
+                alignment: { horizontal: "left", vertical: "center" },
+                border: {
+                    top: { style: "thin", color: { rgb: "DDDDDD" } },
+                    bottom: { style: "thin", color: { rgb: "DDDDDD" } },
+                    left: { style: "thin", color: { rgb: "DDDDDD" } },
+                    right: { style: "thin", color: { rgb: "DDDDDD" } }
+                }
+            };
+
+            // Aplicar estilos
+            for (var C = range.s.c; C <= range.e.c; ++C) {
+                var headerCell = XLSX.utils.encode_cell({ r: 0, c: C });
+                if (ws[headerCell]) {
+                    ws[headerCell].s = headerStyle;
+                }
+                
+                // Aplicar bordas nas células de dados
+                for (var R = 1; R <= range.e.r; ++R) {
+                    var cell = XLSX.utils.encode_cell({ r: R, c: C });
+                    if (ws[cell]) {
+                        ws[cell].s = cellStyle;
+                    }
+                }
+            }
+
+            // Adicionar AutoFilter (filtros nas colunas)
+            ws['!autofilter'] = { ref: ws['!ref'] };
+
+            // Criar workbook
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Usuarios SUB-ST");
+
+            // Adicionar metadados
+            wb.Props = {
+                Title: "Sistemas de Usuários de SUB-ST",
+                Subject: "Relatório de Usuários",
+                Author: "SUB-ST",
+                CreatedDate: new Date()
+            };
+
+            // Gerar arquivo e fazer download
+            var nomeArquivo = 'Relatorio_Usuarios_SUBST_' + new Date().toISOString().slice(0,10) + '.xlsx';
+            XLSX.writeFile(wb, nomeArquivo);
+
+            mostrarToast('Relatório exportado! Cada sistema do usuário em uma linha separada.', 'success');
+        }
+        // ========== FIM EXPORTAR EXCEL ==========
+
         function salvarDados() {
             localStorage.setItem('usuariosSUBST', JSON.stringify(usuarios));
         }
@@ -814,11 +1162,11 @@
         function mostrarToast(mensagem, tipo) {
             const toast = document.getElementById('toast');
             toast.textContent = mensagem;
-            toast.className = `toast toast-${tipo}`;
+            toast.className = 'toast toast-' + tipo;
             
-            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(function() { toast.classList.add('show'); }, 10);
             
-            setTimeout(() => {
+            setTimeout(function() {
                 toast.classList.remove('show');
             }, 3000);
         }
@@ -837,4 +1185,11 @@
         });
     </script>
 </body>
-</html>
+</html>'''
+
+# Salvar o arquivo
+with open('/mnt/agents/output/sistemas-usuarios-subst.html', 'w', encoding='utf-8') as f:
+    f.write(html_content)
+
+print("Arquivo atualizado com sucesso!")
+print(f"Tamanho: {len(html_content):,} caracteres")
