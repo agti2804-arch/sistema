@@ -1,4 +1,4 @@
-html_content = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -307,6 +307,7 @@ html_content = r'''<!DOCTYPE html>
             gap: 10px;
             margin-top: 20px;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         .table-section {
@@ -437,6 +438,16 @@ html_content = r'''<!DOCTYPE html>
             padding: 20px;
             background: #f8f9fa;
             border-bottom: 1px solid #eee;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            min-width: 250px;
         }
 
         .search-box input {
@@ -621,6 +632,11 @@ html_content = r'''<!DOCTYPE html>
             .actions {
                 flex-direction: column;
             }
+
+            .search-box {
+                flex-direction: column;
+                align-items: stretch;
+            }
         }
     </style>
 </head>
@@ -677,6 +693,15 @@ html_content = r'''<!DOCTYPE html>
                         <button type="button" class="btn btn-warning" id="btnLimpar" onclick="limparFormulario()">
                             Limpar
                         </button>
+                        <button type="button" class="btn btn-excel" onclick="exportarExcel()">
+                            Exportar para Excel
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="imprimirRelatorio()">
+                            Imprimir Relatório
+                        </button>
+                        <button type="button" class="btn btn-danger" onclick="confirmarLimparTudo()">
+                            Limpar Todos os Dados
+                        </button>
                     </div>
                 </form>
             </div>
@@ -691,7 +716,9 @@ html_content = r'''<!DOCTYPE html>
                 </div>
                 
                 <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Pesquisar por nome, RF, e-mail, setor ou sistema..." onkeyup="filtrarTabela()">
+                    <div class="search-input-wrapper">
+                        <input type="text" id="searchInput" placeholder="Pesquisar por nome, RF, e-mail, setor ou sistema..." onkeyup="filtrarTabela()">
+                    </div>
                 </div>
 
                 <div id="tableContainer">
@@ -710,18 +737,6 @@ html_content = r'''<!DOCTYPE html>
                             <!-- Data will be inserted here -->
                         </tbody>
                     </table>
-                </div>
-
-                <div class="btn-group" style="padding: 20px; justify-content: center;">
-                    <button class="btn btn-excel" onclick="exportarExcel()">
-                        Exportar para Excel
-                    </button>
-                    <button class="btn btn-success" onclick="imprimirRelatorio()">
-                        Imprimir Relatório
-                    </button>
-                    <button class="btn btn-danger" onclick="confirmarLimparTudo()">
-                        Limpar Todos os Dados
-                    </button>
                 </div>
             </div>
         </div>
@@ -913,7 +928,7 @@ html_content = r'''<!DOCTYPE html>
                             '<div class="empty-state-icon">📭</div>' +
                             '<p>Nenhum usuário cadastrado.</p>' +
                             '<p>Preencha o formulário acima para adicionar um novo usuário.</p>' +
-                        '</td>' +
+                        '</table>' +
                     '</tr>';
                 totalRegistros.textContent = '0';
                 return;
@@ -1185,11 +1200,4 @@ html_content = r'''<!DOCTYPE html>
         });
     </script>
 </body>
-</html>'''
-
-# Salvar o arquivo
-with open('/mnt/agents/output/sistemas-usuarios-subst.html', 'w', encoding='utf-8') as f:
-    f.write(html_content)
-
-print("Arquivo atualizado com sucesso!")
-print(f"Tamanho: {len(html_content):,} caracteres")
+</html>
