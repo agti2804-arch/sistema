@@ -302,6 +302,16 @@
             box-shadow: 0 5px 20px rgba(33, 115, 70, 0.4);
         }
 
+        .btn-edit-global {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .btn-edit-global:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+        }
+
         .btn-group {
             display: flex;
             gap: 10px;
@@ -438,16 +448,6 @@
             padding: 20px;
             background: #f8f9fa;
             border-bottom: 1px solid #eee;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-        }
-
-        .search-input-wrapper {
-            flex: 1;
-            min-width: 250px;
         }
 
         .search-box input {
@@ -632,11 +632,16 @@
             .actions {
                 flex-direction: column;
             }
+        }
 
-            .search-box {
-                flex-direction: column;
-                align-items: stretch;
-            }
+        /* Estilo especial para o botão editar dados */
+        .btn-edit-data {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+        .btn-edit-data:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
         }
     </style>
 </head>
@@ -650,7 +655,7 @@
         <div class="content">
             <!-- Form Section -->
             <div class="form-section">
-                <h2>Cadastrar Novo Usuário</h2>
+                <h2>Cadastrar / Editar Usuário</h2>
                 <form id="userForm">
                     <input type="hidden" id="editId" value="">
                     <div class="form-grid">
@@ -693,6 +698,10 @@
                         <button type="button" class="btn btn-warning" id="btnLimpar" onclick="limparFormulario()">
                             Limpar
                         </button>
+                        <!-- Botão EDITAR DADOS ao lado do Limpar Tudo -->
+                        <button type="button" class="btn btn-edit-data" onclick="editarDadosSelecionado()">
+                            ✏️ Editar Dados
+                        </button>
                         <button type="button" class="btn btn-excel" onclick="exportarExcel()">
                             Exportar para Excel
                         </button>
@@ -716,15 +725,14 @@
                 </div>
                 
                 <div class="search-box">
-                    <div class="search-input-wrapper">
-                        <input type="text" id="searchInput" placeholder="Pesquisar por nome, RF, e-mail, setor ou sistema..." onkeyup="filtrarTabela()">
-                    </div>
+                    <input type="text" id="searchInput" placeholder="Pesquisar por nome, RF, e-mail, setor ou sistema..." onkeyup="filtrarTabela()">
                 </div>
 
                 <div id="tableContainer">
                     <table id="usersTable">
                         <thead>
                             <tr>
+                                <th><input type="checkbox" id="selectAllCheckbox" onclick="selecionarTodos()"></th>
                                 <th>Nome</th>
                                 <th>RF</th>
                                 <th>E-mail</th>
@@ -917,6 +925,35 @@
             renderizarTabela();
         });
 
+        // Função para editar dados do usuário selecionado (checkbox)
+        function editarDadosSelecionado() {
+            const checkboxes = document.querySelectorAll('.user-select-checkbox:checked');
+            if (checkboxes.length === 0) {
+                mostrarToast('Selecione pelo menos um usuário para editar!', 'error');
+                return;
+            }
+            if (checkboxes.length > 1) {
+                mostrarToast('Selecione apenas um usuário por vez para editar!', 'error');
+                return;
+            }
+            
+            const userId = checkboxes[0].value;
+            const usuario = usuarios.find(function(u) { return u.id === userId; });
+            if (usuario) {
+                document.getElementById('nome').value = usuario.nome;
+                document.getElementById('rf').value = usuario.rf;
+                document.getElementById('email').value = usuario.email;
+                document.getElementById('setor').value = usuario.setor;
+                carregarSistemasEdicao(usuario.sistemas);
+                editId.value = usuario.id;
+                btnSalvar.innerHTML = 'Atualizar Usuário';
+                btnSalvar.classList.remove('btn-primary');
+                btnSalvar.classList.add('btn-success');
+                document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+                mostrarToast('Dados carregados para edição. Altere os campos e clique em ATUALIZAR.', 'info');
+            }
+        }
+
         function renderizarTabela(data) {
             if (data === undefined) data = usuarios;
             tableBody.innerHTML = '';
@@ -924,11 +961,11 @@
             if (data.length === 0) {
                 tableBody.innerHTML = 
                     '<tr>' +
-                        '<td colspan="6" class="empty-state">' +
+                        '<td colspan="7" class="empty-state">' +
                             '<div class="empty-state-icon">📭</div>' +
                             '<p>Nenhum usuário cadastrado.</p>' +
                             '<p>Preencha o formulário acima para adicionar um novo usuário.</p>' +
-                        '</table>' +
+                        '</td>' +
                     '</tr>';
                 totalRegistros.textContent = '0';
                 return;
@@ -937,6 +974,7 @@
             data.forEach(function(usuario) {
                 const tr = document.createElement('tr');
                 tr.innerHTML = 
+                    '<td><input type="checkbox" class="user-select-checkbox" value="' + escapeHtml(usuario.id) + '"></td>' +
                     '<td>' + escapeHtml(usuario.nome) + '</td>' +
                     '<td>' + escapeHtml(usuario.rf) + '</td>' +
                     '<td>' + escapeHtml(usuario.email) + '</td>' +
@@ -1051,21 +1089,27 @@
             window.print();
         }
 
-        // ========== EXPORTAR PARA EXCEL - DADOS DO USUÁRIO + UM SISTEMA POR LINHA ==========
+        // Selecionar todos os checkboxes
+        function selecionarTodos() {
+            const selectAll = document.getElementById('selectAllCheckbox');
+            const checkboxes = document.querySelectorAll('.user-select-checkbox');
+            checkboxes.forEach(function(cb) {
+                cb.checked = selectAll.checked;
+            });
+        }
+
+        // ========== EXPORTAR PARA EXCEL ==========
         function exportarExcel() {
             if (usuarios.length === 0) {
                 mostrarToast('Não há dados para exportar!', 'error');
                 return;
             }
 
-            // Criar dados expandidos: cada sistema do usuário em uma linha separada
-            // Mantendo TODOS os dados do usuário em cada linha
             var dadosExcel = [];
             
             usuarios.forEach(function(u) {
                 var sistemas = u.sistemas.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
                 
-                // Se não tiver sistemas, adiciona uma linha com sistema vazio
                 if (sistemas.length === 0) {
                     dadosExcel.push({
                         'Nome': u.nome,
@@ -1078,7 +1122,6 @@
                     return;
                 }
                 
-                // Para CADA sistema do usuário, criar uma linha completa com todos os dados
                 sistemas.forEach(function(sistema) {
                     dadosExcel.push({
                         'Nome': u.nome,
@@ -1091,84 +1134,14 @@
                 });
             });
 
-            // Criar worksheet
             var ws = XLSX.utils.json_to_sheet(dadosExcel);
-
-            // Definir larguras das colunas
-            ws['!cols'] = [
-                { wch: 35 },  // Nome
-                { wch: 15 },  // RF
-                { wch: 35 },  // E-mail
-                { wch: 25 },  // Setor
-                { wch: 30 },  // Sistema
-                { wch: 18 }   // Data de Cadastro
-            ];
-
-            // Aplicar estilos nos cabeçalhos (linha 1)
-            var range = XLSX.utils.decode_range(ws['!ref']);
-            
-            // Estilo do cabeçalho
-            var headerStyle = {
-                font: { bold: true, color: { rgb: "FFFFFF" }, sz: 12 },
-                fill: { fgColor: { rgb: "2C5364" }, patternType: "solid" },
-                alignment: { horizontal: "left", vertical: "center" },
-                border: {
-                    top: { style: "thin", color: { rgb: "1A3A4A" } },
-                    bottom: { style: "thin", color: { rgb: "1A3A4A" } },
-                    left: { style: "thin", color: { rgb: "1A3A4A" } },
-                    right: { style: "thin", color: { rgb: "1A3A4A" } }
-                }
-            };
-
-            // Estilo das células de dados
-            var cellStyle = {
-                alignment: { horizontal: "left", vertical: "center" },
-                border: {
-                    top: { style: "thin", color: { rgb: "DDDDDD" } },
-                    bottom: { style: "thin", color: { rgb: "DDDDDD" } },
-                    left: { style: "thin", color: { rgb: "DDDDDD" } },
-                    right: { style: "thin", color: { rgb: "DDDDDD" } }
-                }
-            };
-
-            // Aplicar estilos
-            for (var C = range.s.c; C <= range.e.c; ++C) {
-                var headerCell = XLSX.utils.encode_cell({ r: 0, c: C });
-                if (ws[headerCell]) {
-                    ws[headerCell].s = headerStyle;
-                }
-                
-                // Aplicar bordas nas células de dados
-                for (var R = 1; R <= range.e.r; ++R) {
-                    var cell = XLSX.utils.encode_cell({ r: R, c: C });
-                    if (ws[cell]) {
-                        ws[cell].s = cellStyle;
-                    }
-                }
-            }
-
-            // Adicionar AutoFilter (filtros nas colunas)
-            ws['!autofilter'] = { ref: ws['!ref'] };
-
-            // Criar workbook
+            ws['!cols'] = [{ wch: 35 }, { wch: 15 }, { wch: 35 }, { wch: 25 }, { wch: 30 }, { wch: 18 }];
             var wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Usuarios SUB-ST");
-
-            // Adicionar metadados
-            wb.Props = {
-                Title: "Sistemas de Usuários de SUB-ST",
-                Subject: "Relatório de Usuários",
-                Author: "SUB-ST",
-                CreatedDate: new Date()
-            };
-
-            // Gerar arquivo e fazer download
             var nomeArquivo = 'Relatorio_Usuarios_SUBST_' + new Date().toISOString().slice(0,10) + '.xlsx';
             XLSX.writeFile(wb, nomeArquivo);
-
-            mostrarToast('Relatório exportado! Cada sistema do usuário em uma linha separada.', 'success');
+            mostrarToast('Relatório exportado!', 'success');
         }
-        // ========== FIM EXPORTAR EXCEL ==========
 
         function salvarDados() {
             localStorage.setItem('usuariosSUBST', JSON.stringify(usuarios));
@@ -1178,12 +1151,8 @@
             const toast = document.getElementById('toast');
             toast.textContent = mensagem;
             toast.className = 'toast toast-' + tipo;
-            
             setTimeout(function() { toast.classList.add('show'); }, 10);
-            
-            setTimeout(function() {
-                toast.classList.remove('show');
-            }, 3000);
+            setTimeout(function() { toast.classList.remove('show'); }, 3000);
         }
 
         function escapeHtml(text) {
